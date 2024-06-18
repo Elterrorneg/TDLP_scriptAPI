@@ -7,99 +7,100 @@ function Show-LoginWindow {
     $form.Width = 300
     $form.Height = 200
 
-    $labelUser = New-Object Windows.Forms.Label
-    $labelUser.Text = "Usuario"
-    $labelUser.Top = 20
-    $labelUser.Left = 10
-    $labelUser.AutoSize = $true
-    $form.Controls.Add($labelUser)
+    $tabControl = New-Object System.Windows.Forms.TabControl
+    $tabControl.Width = $form.Width
+    $tabControl.Height = $form.Height
+    $form.Controls.Add($tabControl)
 
-    $textUser = New-Object Windows.Forms.TextBox
-    $textUser.Top = 20
-    $textUser.Left = 80
-    $textUser.Width = 150
-    $form.Controls.Add($textUser)
+    $loginTab = New-Object System.Windows.Forms.TabPage
+    $loginTab.Text = "Login"
+    $tabControl.TabPages.Add($loginTab)
 
-    $labelPassword = New-Object Windows.Forms.Label
-    $labelPassword.Text = "Contraseña"
-    $labelPassword.Top = 60
-    $labelPassword.Left = 10
-    $labelPassword.AutoSize = $true
-    $form.Controls.Add($labelPassword)
-
-    $textPassword = New-Object Windows.Forms.TextBox
-    $textPassword.Top = 60
-    $textPassword.Left = 80
-    $textPassword.Width = 150
-    $textPassword.PasswordChar = '*'
-    $form.Controls.Add($textPassword)
-
-    $buttonSubmit = New-Object Windows.Forms.Button
-    $buttonSubmit.Text = "Enviar"
-    $buttonSubmit.Top = 100
-    $buttonSubmit.Left = 80
-    $buttonSubmit.Width = 80
-    $form.Controls.Add($buttonSubmit)
-
-    $buttonSubmit.Add_Click({
-        $usuario = $textUser.Text
-        $password = $textPassword.Text
-        $form.Close()
-        Main -usuario $usuario -password $password
-    })
-
-    $form.ShowDialog()
-}
-
-function Show-LoginWindow {
-    [void][System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
-    [void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
-
-    $form = New-Object Windows.Forms.Form
-    $form.Text = "Login"
-    $form.Width = 300
-    $form.Height = 200
+    $registerTab = New-Object System.Windows.Forms.TabPage
+    $registerTab.Text = "Register"
+    $tabControl.TabPages.Add($registerTab)
 
     $labelUser = New-Object Windows.Forms.Label
     $labelUser.Text = "Usuario"
     $labelUser.Top = 20
     $labelUser.Left = 10
     $labelUser.AutoSize = $true
-    $form.Controls.Add($labelUser)
+    $loginTab.Controls.Add($labelUser)
 
     $textUser = New-Object Windows.Forms.TextBox
     $textUser.Top = 20
     $textUser.Left = 80
     $textUser.Width = 150
-    $form.Controls.Add($textUser)
+    $loginTab.Controls.Add($textUser)
 
     $labelPassword = New-Object Windows.Forms.Label
     $labelPassword.Text = "Contraseña"
     $labelPassword.Top = 60
     $labelPassword.Left = 10
     $labelPassword.AutoSize = $true
-    $form.Controls.Add($labelPassword)
+    $loginTab.Controls.Add($labelPassword)
 
     $textPassword = New-Object Windows.Forms.TextBox
     $textPassword.Top = 60
     $textPassword.Left = 80
     $textPassword.Width = 150
     $textPassword.PasswordChar = '*'
-    $form.Controls.Add($textPassword)
+    $loginTab.Controls.Add($textPassword)
 
     $buttonSubmit = New-Object Windows.Forms.Button
     $buttonSubmit.Text = "Enviar"
     $buttonSubmit.Top = 100
     $buttonSubmit.Left = 30
     $buttonSubmit.Width = 80
-    $form.Controls.Add($buttonSubmit)
+    $loginTab.Controls.Add($buttonSubmit)
 
     $buttonRegister = New-Object Windows.Forms.Button
     $buttonRegister.Text = "Registrar"
     $buttonRegister.Top = 100
     $buttonRegister.Left = 140
     $buttonRegister.Width = 80
-    $form.Controls.Add($buttonRegister)
+    $loginTab.Controls.Add($buttonRegister)
+
+    $labelUserRegister = New-Object Windows.Forms.Label
+    $labelUserRegister.Text = "Usuario"
+    $labelUserRegister.Top = 20
+    $labelUserRegister.Left = 10
+    $labelUserRegister.AutoSize = $true
+    $registerTab.Controls.Add($labelUserRegister)
+
+    $textUserRegister = New-Object Windows.Forms.TextBox
+    $textUserRegister.Top = 20
+    $textUserRegister.Left = 80
+    $textUserRegister.Width = 150
+    $registerTab.Controls.Add($textUserRegister)
+
+    $labelPasswordRegister = New-Object Windows.Forms.Label
+    $labelPasswordRegister.Text = "Contraseña"
+    $labelPasswordRegister.Top = 60
+    $labelPasswordRegister.Left = 10
+    $labelPasswordRegister.AutoSize = $true
+    $registerTab.Controls.Add($labelPasswordRegister)
+
+    $textPasswordRegister = New-Object Windows.Forms.TextBox
+    $textPasswordRegister.Top = 60
+    $textPasswordRegister.Left = 80
+    $textPasswordRegister.Width = 150
+    $textPasswordRegister.PasswordChar = '*'
+    $registerTab.Controls.Add($textPasswordRegister)
+
+    $buttonSubmitRegister = New-Object Windows.Forms.Button
+    $buttonSubmitRegister.Text = "Registrar"
+    $buttonSubmitRegister.Top = 100
+    $buttonSubmitRegister.Left = 30
+    $buttonSubmitRegister.Width = 80
+    $registerTab.Controls.Add($buttonSubmitRegister)
+
+    $buttonCancelar = New-Object Windows.Forms.Button
+    $buttonCancelar.Text = "Cancelar"
+    $buttonCancelar.Top = 100
+    $buttonCancelar.Left = 140
+    $buttonCancelar.Width = 80
+    $registerTab.Controls.Add($buttonCancelar)
 
     $buttonSubmit.Add_Click({
         $usuario = $textUser.Text
@@ -109,74 +110,41 @@ function Show-LoginWindow {
     })
 
     $buttonRegister.Add_Click({
-        $form.Close()
-        Show-RegisterWindow
-    })
-
-    $form.ShowDialog()
+        foreach ($control in $loginTab.Controls) {
+            if ($control -is [System.Windows.Forms.TextBox]) {
+                $control.Visible = $false
+            }
+        }
+        foreach ($control in $registerTab.Controls) {
+            if ($control -is [System.Windows.Forms.TextBox]) {
+                $control.Visible = $true
 }
-
-function Show-RegisterWindow{
-    [void][System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
-    [void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
-
-    $form = New-Object Windows.Forms.Form
-    $form.Text = "Register"
-    $form.Width = 300
-    $form.Height = 200
-
-    $labelUser = New-Object Windows.Forms.Label
-    $labelUser.Text = "Usuario"
-    $labelUser.Top = 20
-    $labelUser.Left = 10
-    $labelUser.AutoSize = $true
-    $form.Controls.Add($labelUser)
-
-    $textUser = New-Object Windows.Forms.TextBox
-    $textUser.Top = 20
-    $textUser.Left = 80
-    $textUser.Width = 150
-    $form.Controls.Add($textUser)
-
-    $labelPassword = New-Object Windows.Forms.Label
-    $labelPassword.Text = "Contraseña"
-    $labelPassword.Top = 60
-    $labelPassword.Left = 10
-    $labelPassword.AutoSize = $true
-    $form.Controls.Add($labelPassword)
-
-    $textPassword = New-Object Windows.Forms.TextBox
-    $textPassword.Top = 60
-    $textPassword.Left = 80
-    $textPassword.Width = 150
-    $textPassword.PasswordChar = '*'
-    $form.Controls.Add($textPassword)
-
-    $buttonSubmit = New-Object Windows.Forms.Button
-    $buttonSubmit.Text = "Registrar"
-    $buttonSubmit.Top = 100
-    $buttonSubmit.Left = 30
-    $buttonSubmit.Width = 80
-    $form.Controls.Add($buttonSubmit)
-
-    $buttonCancelar = New-Object Windows.Forms.Button
-    $buttonCancelar.Text = "Cancelar"
-    $buttonCancelar.Top = 100
-    $buttonCancelar.Left = 140
-    $buttonCancelar.Width = 80
-    $form.Controls.Add($buttonCancelar)
-
-    $buttonSubmit.Add_Click({
-        $usuario = $textUser.Text
-        $password = $textPassword.Text
-        $form.Close()
-        Main -usuario $usuario -password $password
+        }
+        $tabControl.SelectedIndex = 1
     })
 
     $buttonCancelar.Add_Click({
-        $form.Close()
-        Show-LoginWindow
+        foreach ($control in $registerTab.Controls) {
+            if ($control -is [System.Windows.Forms.TextBox]) {
+                $control.Visible = $false
+            }
+        }
+        foreach ($control in $loginTab.Controls) {
+            if ($control -is [System.Windows.Forms.TextBox]) {
+                $control.Visible = $true
+            }
+        }
+        $tabControl.SelectedIndex = 0
     })
+
+
+    $buttonSubmitRegister.Add_Click({
+        $usuario = $textUserRegister.Text
+        $password = $textPasswordRegister.Text
+        $form.Close()
+        Register -usuario $usuario -password $password
+    })
+
     $form.ShowDialog()
 }
 
@@ -186,21 +154,12 @@ function Register {
         [string]$password
     )
 
-    # Obtener el nombre de la PC
-    $nombrePC = [System.Environment]::MachineName
-
-    Write-Output "Nombre de la PC: $nombrePC"
-
-    # URL para autenticar y obtener el token
-    $urlAuth = "http://brandomedina.pythonanywhere.com/auth"
-
-    # URL para enviar los eventos
-    $urlEvento = "http://brandomedina.pythonanywhere.com/api_registraraplicacion"
+    $urlUsuario = "http://brandomedina.pythonanywhere.com/api_registrarusuario"
 
     # Datos de autenticación
     $authBody = @{
-        "username" = $usuario
-        "password" = $password
+        "usuario" = $usuario
+        "pass" = $password
     } | ConvertTo-Json
 
     Write-Output "Cuerpo de la solicitud de autenticación: $authBody"
@@ -209,59 +168,15 @@ function Register {
     $authHeaders = @{
         "Content-Type" = "application/json"
     }
-
-    # Obtener el token
     try {
-        $responseAuth = Invoke-RestMethod -Uri $urlAuth -Headers $authHeaders -Method Post -Body $authBody -ContentType "application/json; charset=utf-8"
-        Write-Output "Respuesta de autenticación: $responseAuth"
+        $responseApi = Invoke-RestMethod -Uri $urlUsuario -Headers $authHeaders -Method Post -Body $authBody -ContentType "application/json; charset=utf-8"
+        Write-Output "Response from API: $responseApi"
+        [System.Windows.Forms.MessageBox]::Show("Datos enviados correctamente")
     } catch {
-        Write-Output "Error durante la autenticación: $_"
-        [System.Windows.Forms.MessageBox]::Show("Datos incorrectos")
-        return
-    }
-
-    if ($responseAuth -ne $null -and $responseAuth.access_token -ne $null) {
-        $token = $responseAuth.access_token
-        Write-Output "Token obtenido: $token"
-
-        # Encabezados para la solicitud de envío de eventos
-        $headers = @{
-            "Content-Type" = "application/json; charset=utf-8"
-            "Authorization" = "JWT $token"
-        }
-
-        Write-Output "Encabezados para la solicitud de eventos: $headers"
-
-        # Obtener eventos de aplicación del Visor de eventos
-        $events = Get-WinEvent -LogName Application -MaxEvents 20
-
-        # Convertir eventos a JSON
-        $jsonBody = $events | ForEach-Object {
-            [PSCustomObject]@{
-                nivel = $_.LevelDisplayName
-                fecha_hora = $_.TimeCreated.ToString("yyyy-MM-ddTHH:mm:ssZ")
-                origen = $_.ProviderName
-                id_evento = $_.Id
-                categoria_tarea = "aplicacion"
-                nombre_pc = $nombrePC  # Agregar el nombre de la PC
-            }
-        } | ConvertTo-Json -Depth 3
-
-        Write-Output "Cuerpo de la solicitud de eventos: $jsonBody"
-
-        # Enviar los datos a la API
-        try {
-            $responseApi = Invoke-RestMethod -Uri $urlEvento -Headers $headers -Method Post -Body $jsonBody -ContentType "application/json; charset=utf-8"
-            Write-Output "Response from API: $responseApi"
-            [System.Windows.Forms.MessageBox]::Show("Datos enviados correctamente")
-        } catch {
-            Write-Output "Error al enviar eventos: $_"
-            $errorContent = $_.Exception.Response.Content
-            Write-Output "Detalles del error: $errorContent"
-            [System.Windows.Forms.MessageBox]::Show("Error al enviar eventos")
-        }
-    } else {
-        Write-Output "Error al obtener el token de autenticación"
+        Write-Output "Error al enviar usuarios: $_"
+        $errorContent = $_.Exception.Response.Content
+        Write-Output "Detalles del error: $errorContent"
+        [System.Windows.Forms.MessageBox]::Show("Error al enviar usuarios")
     }
 }
 
@@ -338,7 +253,7 @@ function Main {
                 fecha_hora = $_.TimeCreated.ToString("yyyy-MM-ddTHH:mm:ssZ")
                 origen = $_.ProviderName
                 id_evento = $_.Id
-                categoria_tarea = "aplicacion"
+                categoria_tarea = $_.Task
                 nombre_pc = $nombrePC  # Agregar el nombre de la PC
             }
         } | ConvertTo-Json -Depth 3
@@ -367,7 +282,7 @@ function Main {
                 fecha_hora = $_.TimeCreated.ToString("yyyy-MM-ddTHH:mm:ssZ")
                 origen = $_.ProviderName
                 id_evento = $_.Id
-                categoria_tarea = "instalacion"
+                categoria_tarea = $_.Task
                 nombre_pc = $nombrePC  # Agregar el nombre de la PC
             }
         } | ConvertTo-Json -Depth 3
@@ -396,7 +311,7 @@ function Main {
                 fecha_hora = $_.TimeCreated.ToString("yyyy-MM-ddTHH:mm:ssZ")
                 origen = $_.ProviderName
                 id_evento = $_.Id
-                categoria_tarea = "sistema"
+                categoria_tarea = $_.Task
                 nombre_pc = $nombrePC  # Agregar el nombre de la PC
             }
         } | ConvertTo-Json -Depth 3
@@ -425,7 +340,7 @@ function Main {
                 fecha_hora = $_.TimeCreated.ToString("yyyy-MM-ddTHH:mm:ssZ")
                 origen = $_.ProviderName
                 id_evento = $_.Id
-                categoria_tarea = "seguridad"
+                categoria_tarea = $_.Task
                 nombre_pc = $nombrePC
             }
         } | ConvertTo-Json -Depth 3
