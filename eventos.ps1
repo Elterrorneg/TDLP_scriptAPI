@@ -421,7 +421,7 @@ function Main {
         # Convertir eventos a JSON
         $jsonBodySeguridad = $eventsSeguridad | ForEach-Object {
             [PSCustomObject]@{
-                palabras_clave = $_.Message
+                palabras_clave = $_.KeywordsDisplayNames -join ", "
                 fecha_hora = $_.TimeCreated.ToString("yyyy-MM-ddTHH:mm:ssZ")
                 origen = $_.ProviderName
                 id_evento = $_.Id
