@@ -2,15 +2,66 @@ function Show-LoginWindow {
     [void][System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
     [void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 
+    # Crear formulario principal
     $form = New-Object Windows.Forms.Form
-    $form.Text = "Login"
-    $form.Width = 300
-    $form.Height = 200
+    $form.Text = "Configuración de conexión SQL Server"
+    $form.Width = 350
+    $form.Height = 150
+
+    # Crear etiqueta y caja de texto para ingresar el nombre del servidor SQL Server
+    $labelServerName = New-Object Windows.Forms.Label
+    $labelServerName.Text = "Nombre del servidor SQL Server:"
+    $labelServerName.Top = 20
+    $labelServerName.Left = 10
+    $labelServerName.AutoSize = $true
+    $form.Controls.Add($labelServerName)
+
+    $textBoxServerName = New-Object Windows.Forms.TextBox
+    $textBoxServerName.Top = 20
+    $textBoxServerName.Left = 180
+    $textBoxServerName.Width = 150
+    $form.Controls.Add($textBoxServerName)
+
+    # Botón para conectar al servidor SQL Server ingresado
+    $buttonConnect = New-Object Windows.Forms.Button
+    $buttonConnect.Text = "Conectar"
+    $buttonConnect.Top = 60
+    $buttonConnect.Left = 120
+    $buttonConnect.Width = 100
+    $buttonConnect.Add_Click({
+        # Obtener el nombre del servidor ingresado por el usuario
+        $serverName = $textBoxServerName.Text
+
+        # Cerrar el formulario de configuración
+        $form.Close()
+
+        # Mostrar el formulario de login con el servidor SQL Server seleccionado
+        Show-LoginForm -ServerName $serverName
+    })
+    $form.Controls.Add($buttonConnect)
+
+    # Mostrar el formulario de configuración
+    $form.ShowDialog()
+}
+
+# Función para mostrar la ventana de login con el servidor SQL Server seleccionado
+function Show-LoginForm {
+    param (
+        [string]$ServerName
+    )
+
+    [void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
+
+    # Crear formulario de login
+    $loginForm = New-Object Windows.Forms.Form
+    $loginForm.Text = "Login"
+    $loginForm.Width = 300
+    $loginForm.Height = 200
 
     $tabControl = New-Object System.Windows.Forms.TabControl
-    $tabControl.Width = $form.Width
-    $tabControl.Height = $form.Height
-    $form.Controls.Add($tabControl)
+    $tabControl.Width = $loginForm.Width
+    $tabControl.Height = $loginForm.Height
+    $loginForm.Controls.Add($tabControl)
 
     $loginTab = New-Object System.Windows.Forms.TabPage
     $loginTab.Text = "Login"
@@ -105,8 +156,8 @@ function Show-LoginWindow {
     $buttonSubmit.Add_Click({
         $usuario = $textUser.Text
         $password = $textPassword.Text
-        $form.Close()
-        Main -usuario $usuario -password $password
+        $loginForm.Close()
+        Main -usuario $usuario -password $password -serverName $ServerName
     })
 
     $buttonRegister.Add_Click({
@@ -118,7 +169,7 @@ function Show-LoginWindow {
         foreach ($control in $registerTab.Controls) {
             if ($control -is [System.Windows.Forms.TextBox]) {
                 $control.Visible = $true
-}
+            }
         }
         $tabControl.SelectedIndex = 1
     })
@@ -137,15 +188,15 @@ function Show-LoginWindow {
         $tabControl.SelectedIndex = 0
     })
 
-
     $buttonSubmitRegister.Add_Click({
         $usuario = $textUserRegister.Text
         $password = $textPasswordRegister.Text
-        $form.Close()
+        $loginForm.Close()
         Register -usuario $usuario -password $password
     })
 
-    $form.ShowDialog()
+    # Mostrar el formulario de login
+    $loginForm.ShowDialog()
 }
 
 function Register {
@@ -183,7 +234,8 @@ function Register {
 function Main {
     param (
         [string]$usuario,
-        [string]$password
+        [string]$password,
+        [string]$serverName
     )
 
     Write-Output "Iniciando autenticación para el usuario: $usuario"
@@ -195,18 +247,6 @@ function Main {
 
     # URL para autenticar y obtener el token
     $urlAuth = "http://brandomedina.pythonanywhere.com/auth"
-
-    # URL para enviar los eventos de aplicacion
-    $urlEventoAplicacion = "http://brandomedina.pythonanywhere.com/api_registraraplicacion"
-
-     # URL para enviar los eventos de instalación
-    $urlEventoInstalacion = "http://brandomedina.pythonanywhere.com/api_registrarinstalacion"
-
-    # URL para enviar los eventos de sistema
-    $urlEventoSistema = "http://brandomedina.pythonanywhere.com/api_registrarsistema"
-
-    # URL para enviar los eventos de seguridad
-    $urlEventoSeguridad = "http://brandomedina.pythonanywhere.com/api_registrarseguridad"
 
     # URL para enviar los eventos SQL Server
     $urlEventoSQLServer = "http://brandomedina.pythonanywhere.com/api_registrarsqlserver"
@@ -246,126 +286,9 @@ function Main {
 
         Write-Output "Encabezados para la solicitud de eventos: $headers"
 
-        # Obtener eventos de aplicación del Visor de eventos
-        $eventsAplicacion = Get-WinEvent -LogName Application -MaxEvents 20
-
-        # Convertir eventos a JSON
-        $jsonBodyAplicacion = $eventsAplicacion | ForEach-Object {
-            [PSCustomObject]@{
-                nivel = $_.LevelDisplayName
-                fecha_hora = $_.TimeCreated.ToString("yyyy-MM-ddTHH:mm:ssZ")
-                origen = $_.ProviderName
-                id_evento = $_.Id
-                categoria_tarea = $_.Task
-                nombre_pc = $nombrePC  # Agregar el nombre de la PC
-            }
-        } | ConvertTo-Json -Depth 3
-
-        Write-Output "Cuerpo de la solicitud de eventos (aplicación): $jsonBodyAplicacion"
-
-        # Enviar los datos a la API aplicacion
-        try {
-            $responseApi = Invoke-RestMethod -Uri $urlEventoAplicacion -Headers $headers -Method Post -Body $jsonBodyAplicacion -ContentType "application/json; charset=utf-8"
-            Write-Output "Response from API (aplicación): $responseApi"
-            [System.Windows.Forms.MessageBox]::Show("Datos aplicacion enviados correctamente")
-        } catch {
-            Write-Output "Error al enviar eventos: $_"
-            $errorContent = $_.Exception.Response.Content
-            Write-Output "Detalles del error: $errorContent"
-            [System.Windows.Forms.MessageBox]::Show("Error al enviar eventos aplicacion")
-        }
-        
-        # Obtener eventos de instalación del Visor de eventos
-        $eventsInstalacion = Get-WinEvent -LogName Setup -MaxEvents 20
-
-        # Obtener eventos de instalación del Visor de eventos
-        $jsonBodyInstalacion = $eventsInstalacion | ForEach-Object {
-            [PSCustomObject]@{
-                nivel = $_.LevelDisplayName
-                fecha_hora = $_.TimeCreated.ToString("yyyy-MM-ddTHH:mm:ssZ")
-                origen = $_.ProviderName
-                id_evento = $_.Id
-                categoria_tarea = $_.Task
-                nombre_pc = $nombrePC  # Agregar el nombre de la PC
-            }
-        } | ConvertTo-Json -Depth 3
-
-        Write-Output "Cuerpo de la solicitud de eventos (instalación): $jsonBodyInstalacion"
-
-        # Enviar los datos de instalación a la API
-        try {
-            $responseApi = Invoke-RestMethod -Uri $urlEventoInstalacion -Headers $headers -Method Post -Body $jsonBodyInstalacion -ContentType "application/json; charset=utf-8"
-            Write-Output "Respuesta de la API (instalación): $responseApi"
-            [System.Windows.Forms.MessageBox]::Show("Datos de instalación enviados correctamente")
-        } catch {
-            Write-Output "Error al enviar eventos de instalación: $_"
-            $errorContent = $_.Exception.Response.Content
-            Write-Output "Detalles del error: $errorContent"
-            [System.Windows.Forms.MessageBox]::Show("Error al enviar eventos de instalación")
-        }
-
-        # Obtener eventos de sistema del Visor de eventos
-        $eventsSistema = Get-WinEvent -LogName System -MaxEvents 20
-
-        # Convertir eventos de sistema a JSON
-        $jsonBodySistema = $eventsSistema | ForEach-Object {
-            [PSCustomObject]@{
-                nivel = $_.LevelDisplayName
-                fecha_hora = $_.TimeCreated.ToString("yyyy-MM-ddTHH:mm:ssZ")
-                origen = $_.ProviderName
-                id_evento = $_.Id
-                categoria_tarea = $_.Task
-                nombre_pc = $nombrePC  # Agregar el nombre de la PC
-            }
-        } | ConvertTo-Json -Depth 3
-
-        Write-Output "Cuerpo de la solicitud de eventos (sistema): $jsonBodySistema"
-
-        # Enviar los datos de sistema a la API
-        try {
-            $responseApi = Invoke-RestMethod -Uri $urlEventoSistema -Headers $headers -Method Post -Body $jsonBodySistema -ContentType "application/json; charset=utf-8"
-            Write-Output "Respuesta de la API (sistema): $responseApi"
-            [System.Windows.Forms.MessageBox]::Show("Datos de sistema enviados correctamente")
-        } catch {
-            Write-Output "Error al enviar eventos de sistema: $_"
-            $errorContent = $_.Exception.Response.Content
-            Write-Output "Detalles del error: $errorContent"
-            [System.Windows.Forms.MessageBox]::Show("Error al enviar eventos de sistema")
-        }
-
-        # Obtener eventos de seguridad del Visor de eventos
-        $eventsSeguridad = Get-WinEvent -LogName Security -MaxEvents 20
-
-        # Convertir eventos a JSON
-        $jsonBodySeguridad = $eventsSeguridad | ForEach-Object {
-            [PSCustomObject]@{
-                palabras_clave = $_.KeywordsDisplayNames -join ", "
-                fecha_hora = $_.TimeCreated.ToString("yyyy-MM-ddTHH:mm:ssZ")
-                origen = $_.ProviderName
-                id_evento = $_.Id
-                categoria_tarea = $_.Task
-                nombre_pc = $nombrePC
-            }
-        } | ConvertTo-Json -Depth 3
-
-        Write-Output "Cuerpo de la solicitud de eventos: $jsonBodySeguridad"
-
-        # Enviar los datos a la API seguridad
-        try {
-            $responseApi = Invoke-RestMethod -Uri $urlEventoSeguridad -Headers $headers -Method Post -Body $jsonBodySeguridad -ContentType "application/json; charset=utf-8"
-            Write-Output "Response from API: $responseApi"
-            [System.Windows.Forms.MessageBox]::Show("Datos seguridad enviados correctamente")
-        } catch {
-            Write-Output "Error al enviar eventos: $_"
-            $errorContent = $_.Exception.Response.Content
-            Write-Output "Detalles del error: $errorContent"
-            [System.Windows.Forms.MessageBox]::Show("Error al enviar eventos")
-        }
-
-
-        # Crear la conexiÃ³n a SQL Server
+        # Crear la conexión a SQL Server
         $database = "master"
-        $connectionString = "Server=$nombrePC;Database=$database;Integrated Security=True;"
+        $connectionString = "Server=$serverName;Database=$database;Integrated Security=True;"
         $query = "EXEC xp_readerrorlog"
 
         try {
@@ -409,10 +332,11 @@ function Main {
             Write-Output "Error al conectar con SQL Server: $_"
             [System.Windows.Forms.MessageBox]::Show("Error al conectar con SQL Server")
         }
-
     } else {
-        Write-Output "Error al obtener el token de autenticación"
+        Write-Output "No se pudo obtener el token de autenticación."
+        [System.Windows.Forms.MessageBox]::Show("Error de autenticación")
     }
 }
 
+# Mostrar ventana de configuración de conexión al inicio
 Show-LoginWindow
