@@ -163,22 +163,36 @@ function Register {
         "pass" = $password
     } | ConvertTo-Json
 
-    Write-Output "Cuerpo de la solicitud de autenticacion: $authBody"
+    Write-Output "Cuerpo de la solicitud de autenticación: $authBody"
 
     # Encabezados para la solicitud de autenticación
     $authHeaders = @{
         "Content-Type" = "application/json"
     }
+
     try {
         $responseApi = Invoke-RestMethod -Uri $urlUsuario -Headers $authHeaders -Method Post -Body $authBody -ContentType "application/json; charset=utf-8"
-        Write-Output "Response from API: $responseApi"
-        [System.Windows.Forms.MessageBox]::Show("Datos enviados correctamente")
+        Write-Output "Respuesta de la API: $responseApi"
+        if ($responseApi.code -eq 1) {
+            [System.Windows.Forms.MessageBox]::Show("Usuario registrado correctamente")
+        } elseif ($responseApi.message -eq 'Usuario ya existe') {
+            Show-ErrorMessage -message "Usuario ya existe"
+        } else {
+            Show-ErrorMessage -message "Error al registrar usuario: $($responseApi.message)"
+        }
     } catch {
         Write-Output "Error al enviar usuarios: $_"
         $errorContent = $_.Exception.Response.Content
         Write-Output "Detalles del error: $errorContent"
-        [System.Windows.Forms.MessageBox]::Show("Error al enviar usuarios")
+        Show-ErrorMessage -message "Error al enviar usuarios"
     }
+}
+
+function Show-ErrorMessage {
+    param (
+        [string]$message
+    )
+    [System.Windows.Forms.MessageBox]::Show($message, "Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
 }
 
 function Aplicacion{
